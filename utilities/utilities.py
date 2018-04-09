@@ -3,21 +3,27 @@
 
 import configparser
 import os
+import sys
 
-
-def getdefaultconfig():
+def compile_config(config_filename):
     """
-    Get the config file in the operating folder
+    With a list of files, compile to have the more defined config informations
+    TODO : Retun only the default config file for now, needs heritage system
+    
+    :config_filename: name of the config file, with extension
+    :type config_filename: string
     """
-    currentfolder = os.getcwd()
-    config = getconfig(os.path.join(currentfolder, 'texpipe.cfg'))
-    return config
-
+    
+    # Get the general base configuration, from the current directory
+    base_config = getconfig(os.path.join(os.getcwd(), config_filename))
+    return base_config
 
 def getconfig(src):
     """
     Read the source cfg file.
     Return a dictionnary with each section itself a dictionnary
+    :src: absolute name of the file to parse
+    :type src: string
     """
     rslt={}
     config = configparser.ConfigParser()
@@ -29,11 +35,33 @@ def getconfig(src):
         rslt[section] = itemlist
     return rslt
 
-def compileconfig():
+
+def get_files_by_extension(targetextension, foldername, recursive):
     """
-    With a list of files, compile to have the more defined config informations
-    TODO : Retun only the default config file for now, needs heritage system
-    """
-    config = getdefaultconfig()
-    return config
+    Get an extension type by name and a folder to check in
+    Return the list of files using this extension
+    Can be recursive or not.
     
+    :targetextension: the extension of the files to list
+    :type targetextension: string
+    :foldername: the folder to list in (absolute name)
+    :type foldername: string
+    :recursive: Recursive search in the folder
+    :type recursive: Boolean
+    """
+    fileList = []
+    if recursive:
+        for root, subFolders, files in os.walk(foldername):
+            for file in files:
+                f = os.path.join(root, file)
+                if os.path.isfile(f):
+                    if os.path.splitext(file)[1][1:] == targetextension:
+                        fileList.append(f)
+    else:
+        for file in os.listdir(foldername):
+            f = os.path.join(foldername, file)
+            if os.path.isfile(f):
+                if os.path.splitext(file)[1][1:] == targetextension:
+                    fileList.append(f)
+
+    return fileList

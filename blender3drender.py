@@ -38,6 +38,8 @@ def main():
             help="This is the sbs filename")
     parser.add_argument("-g", "--graph", dest="graph", type=str, required=True,
             help="This is the graph filename")
+    parser.add_argument("-st", "--style", dest="style", type=str, required=True,
+            help="This is the style of the material, to use proper shading")
     args = parser.parse_args(argv)
 
     if not argv:
@@ -50,12 +52,14 @@ def main():
         return
 
     # Run the rendering function
-    blender3drender(args.sbs, args.graph)
+    blender3drender(args.sbs, args.graph, args.style)
 
-def blender3drender(sbsfile, graphname):
+def blender3drender(sbsfile, graphname, style):
+    
+    # TODO FIXME : Use different Shader style according to args.style
     
     # Get configuration informations
-    config = utilities.compileconfig()
+    config = utilities.compile_config('texpipe.cfg')
     
     ###### VARIABLES ##### 
     renderobject = config['3dscene']['renderobject']
