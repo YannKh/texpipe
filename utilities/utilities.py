@@ -4,6 +4,7 @@
 import configparser
 import os
 import sys
+import shutil
 
 def compile_config(config_filename):
     """
@@ -65,3 +66,26 @@ def get_files_by_extension(targetextension, foldername, recursive):
                     fileList.append(f)
 
     return fileList
+
+def copy_folder_content(source, destination, extension =''):
+    """
+    Copy all the files from a folder to another one
+    Can restrict to an extension type if needed
+    
+    :source: absolute path of the source folder
+    :type source: string
+    :destination: absolute path of the destination folder
+    :type destination: string
+    :extension: Recursive search in the folder
+    :type recursive: string
+    """
+    folder_content = os.listdir(source)
+
+    for files in folder_content:
+        files = os.path.join(source, files)
+        if extension == '':
+            shutil.copy(files, destination)
+        else:
+            for files in folder_content:
+                if files.endswith('.{}'.format(extension)):
+                    shutil.copy(files, destination)
