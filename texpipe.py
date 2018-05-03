@@ -8,8 +8,9 @@ from PIL import Image
 # Personnal libraries
 sys.path.insert(0, 'utilities')
 import utilities
-import substance
+import pipe_substance
 import imaging
+from pysbs import batchtools, substance, context
 
 def main():
     
@@ -20,10 +21,16 @@ def main():
     # Get the .sbs files list
     foldername = config['folder']['sbs']
     sbsfiles = utilities.get_files_by_extension('sbs', foldername, True)
-    print(sbsfiles)
     # Cook the corresponding.sbsar files
     for sbsfile in sbsfiles:
-        substance.cooksbsar(sbsfile, config['folder']['sbsar'])
+        pipe_substance.cooksbsar(sbsfile, config['folder']['sbsar'])
+    # Get the metadata from the sbs file
+    sbs_content = pipe_substance.read_sbs(sbsfile)
+    print('Contenu : {}'.format(sbs_content))
+
+            
+        
+        
     # Render the textures from the coked .sbsar
     # TODO FIXME
     # render_textures(material_name, random_seed, params, sbsar_file, output_size, output_path, use_gpu_engine)

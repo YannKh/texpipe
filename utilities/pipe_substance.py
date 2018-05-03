@@ -3,7 +3,7 @@
 
 import os
 import sys
-from pysbs import batchtools
+from pysbs import batchtools, substance, context
 
 def cooksbsar(src_file, output_path):
     """
@@ -19,10 +19,18 @@ def cooksbsar(src_file, output_path):
     :return: None
     """
     print('Operating {}'.format(src_file))
+    myContext = context.Context()
+    sbsDoc = substance.SBSDocument(myContext,src_file)
+    sbsDoc.parseDoc()
+    graph = sbsDoc.getSBSGraphList()[0]
     batchtools.sbscooker(inputs=src_file,
                          output_path=output_path,
                          expose_random_seed=False,
-                         quiet=True).wait()
+                         quiet=True,
+                         verbose=False,
+                         includes='/opt/Allegorithmic/Substance_Designer/resources/packages'
+                         ).wait()
+
 
 def render_textures(material_name, random_seed, params, sbsar_file, output_size, output_path, use_gpu_engine):
     """
@@ -57,3 +65,27 @@ def render_textures(material_name, random_seed, params, sbsar_file, output_size,
                                 output_name='%s-{outputNodeName}' % (material_name),
                                 set_value=values,
                                 **(engine_params)).wait()
+
+def read_sbs(sbsfile):
+    # Documentation about SBSGraph : https://support.allegorithmic.com/documentation/display/SAT/graph#graph.graph.SBSGraph
+    content = []
+    myContext = context.Context()
+    sbsDoc = substance.SBSDocument(myContext, sbsfile)
+    sbsDoc.parseDoc()
+    graphs = sbsDoc.getSBSGraphList()
+    for item in graphs:
+        graph = {}
+        # Doc : https://support.allegorithmic.com/documentation/display/SAT/inputparameters#graph.inputparameters.SBSParamInput
+        graph['identifier'] = item.mIdentifier
+        graph['label'] = item.mAttributes.mLabel
+        graph['description'] = item.mAttributes.mDescription
+        graph['author'] = item.mAttributes.mAuthor
+        graph['usertags'] = item.mAttributes.mUserTags
+        graph['parameters'] = {}
+        for param in item.mParamInputs:
+            graph['parameters'][param.mIdentifier] = {}
+            graph['parameters'][param.mIdentifier]['identifier'] = param.mIdentifier
+            graph['parameters'][param.mIdentifier]['defaultvalue'] = param.mDefaultValue.getValue()
+        content.append(graph)
+    return content
+    
