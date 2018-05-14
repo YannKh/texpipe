@@ -5,6 +5,31 @@ import os
 import sys
 from pysbs import batchtools, substance, context
 
+def param_vec(name_value_pair):
+    """
+    Generates a string command line parameter string for sbsrender
+
+    :param name_value_pair: name and value of the parameter set as a tuple
+    :type name_value_pair: (string, [val])
+    :return: string The parameter merged with its value in a batch processor compatible way
+    """
+    return '%s@%s' % name_value_pair
+    
+def get_gpu_engine_for_platform():
+    """
+    Gets the gpu engine string for the current platform
+
+    :return: string the gpu engine string
+    """
+    from sys import platform
+    if 'linux' in platform:
+        return "ogl3"
+    elif 'darwin' in platform:
+        return 'ogl3'
+    elif 'win' in platform:
+        return 'd3d10pc'
+    raise BaseException("Failed to identify platform")
+
 def cooksbsar(src_file, output_path):
     """
     Cooks an sbsfile to an sbsar file
@@ -59,8 +84,9 @@ def render_textures(material_name, random_seed, params, sbsar_file, output_size,
         random_number = 0
     values = ['$outputsize@%d,%d' % (output_size, output_size),
               '$randomseed@%d' % random_number] + list(map(param_vec, params.items()))
-    engine_params = {'engine' : batchtools_utilities.get_gpu_engine_for_platform()} if use_gpu_engine else {}
+    engine_params = {'engine' : get_gpu_engine_for_platform()} if use_gpu_engine else {}
     batchtools.sbsrender_render(inputs=sbsar_file,
+                                input_graph = material_name,
                                 output_path=output_path,
                                 output_name='%s-{outputNodeName}' % (material_name),
                                 set_value=values,
