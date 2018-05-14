@@ -1,19 +1,4 @@
-
-Skip to content
-This repository
-
-    Pull requests
-    Issues
-    Marketplace
-    Explore
-
-    @YannKh
-
-2,453
-62,970
-
-    28,720
-
+tests/source/textures_files/*
 tests/result/*
 github/gitignore
 Code
@@ -154,19 +139,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-
-    © 2018 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Status
-    Help
-
-    Contact GitHub
-    API
-    Training
-    Shop
-    Blog
-    About
-
 
