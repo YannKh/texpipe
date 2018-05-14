@@ -31,7 +31,7 @@ def main():
         # For each graph of each .sbs, write the usefull metadata to a sidecar file in final_outputs folder
         for dictionnary in sbs_content:
             sidecar_path = os.path.join(config['folder']['final_previews'], '{}.nfo'.format(dictionnary['identifier']))
-            with open(sidecar_path, 'a') as my_sidecar_file: 
+            with open(sidecar_path, 'w') as my_sidecar_file: 
                 for item in dictionnary:
                     if item == 'description' or item == 'usertags' or item == 'label':
                         my_sidecar_file.write('{}:{}\n'.format(item, dictionnary[item]))
@@ -58,59 +58,60 @@ def main():
 
     
     
-    # # #### 3D renderings ####
-    # for file in sbsfiles:
-        # # get config file for this sbs folder, replace the default generic ones if needed
-        # config_folder = os.path.join(os.path.dirname(file), 'texpipe.cfg')
-        # folder_configuration = utilities.getconfig(config_folder)
-        # for key in folder_configuration:
-            # config[key] = folder_configuration[key]
-        # # Get config file for this sbs, replace the latest one if needed
-        # sbsname = os.path.splitext(os.path.basename(file))[0]
-        # config_file = os.path.join(os.path.dirname(file), os.path.splitext(os.path.basename(file))[0] + '.cfg')
-        # sbs_configuration = utilities.getconfig(config_file)
-        # for key in sbs_configuration:
-            # config[key] = sbs_configuration[key]
-        # print('sbs_configuration :{}'.format(sbs_configuration))
+    # #### 3D renderings ####
+    for file in sbsfiles:
+        # get config file for this sbs folder, replace the default generic ones if needed
+        config_folder = os.path.join(os.path.dirname(file), 'texpipe.cfg')
+        folder_configuration = utilities.getconfig(config_folder)
+        for key in folder_configuration:
+            config[key] = folder_configuration[key]
+        # Get config file for this sbs, replace the latest one if needed
+        sbsname = os.path.splitext(os.path.basename(file))[0]
+        config_file = os.path.join(os.path.dirname(file), os.path.splitext(os.path.basename(file))[0] + '.cfg')
+        sbs_configuration = utilities.getconfig(config_file)
+        for key in sbs_configuration:
+            config[key] = sbs_configuration[key]
+        print('sbs_configuration :{}'.format(sbs_configuration))
         
-        # # Make a scorched view of all the textures -> Operating folder
-        # # TODO
+        # Make a scorched view of all the textures -> Operating folder
+        # TODO
 
 
         
-        # for graphname in sbs_configuration:
-            # # Render the corresponding sbs
-            # if config['blender']:
-                # # Render module with blender engine
-                # blender_path = config['blender']['engine_path']
+        for graphname in sbs_configuration:
+            # Render the corresponding sbs
+            if config['blender']:
+                # Render module with blender engine
+                blender_path = config['blender']['engine_path']
                 
-                # # Render all the files for the wanted type
-                # for style in config['renderstyle']:
-                    # if config['renderstyle'][style] == "True":
-                        # for scene in config[style]:
-                            # render_scene = os.path.join(config['folder']['3dfiles'], config[style][scene])
-                            # print('\nRendering : {} with style {} and material graph {} from file {}.sbs\n'.format(config[style][scene], style, graphname, sbsname))
-                            # # Using argparse in Blender python script as click is not recognized
-                            # subprocess.call([blender_path, render_scene, '--background', '--python', 'blender3drender.py', '--', '--graph=' + graphname, '--sbs=' + sbsname, '--style=' +style])
+                # Render all the files for the wanted type
+                for style in config['renderstyle']:
+                    if config['renderstyle'][style] == "True":
+                        for scene in config[style]:
+                            render_scene = os.path.join(config['folder']['3dfiles'], config[style][scene])
+                            print('\nRendering : {} with style {} and material graph {} from file {}.sbs\n'.format(config[style][scene], style, graphname, sbsname))
+                            
+                            # Using argparse in Blender python script as click is not recognized
+                            subprocess.call([blender_path, render_scene, '--background', '--python', 'blender3drender.py', '--', '--graph=' + graphname, '--sbs=' + sbsname, '--style=' +style])
 
-    # # Copy all the 3D renders files to operating folder
-    # utilities.copy_folder_content(config['folder']['finals'], config['folder']['operating'])
+    # Copy all the 3D renders files to operating folder
+    utilities.copy_folder_content(config['folder']['finals'], config['folder']['operating'])
     
-    # # Brand the operating files
-    # filelist = os.listdir(config['folder']['operating'])
-    # for image in filelist:
-        # image_path = os.path.join(config['folder']['operating'], image)
-        # # Put them with correct definition
-        # image_content = Image.open(image_path) 
-        # image_content = image_content.resize((int(config['3dscene']['size']), int(config['3dscene']['size'])))
-        # image_content.save(image_path)
-        # logo = config['logo']['logofile']
-        # scale = float(config['logo']['scale'])
-        # margin = float(config['logo']['margin'])
-        # opacity = float(config['logo']['opacity'])
-        # destination = config['folder']['final_previews']
-        # imaging.watermark(image_path, destination, logo, scale, margin, opacity)
-    
+    # Brand the operating files
+    filelist = os.listdir(config['folder']['operating'])
+    for image in filelist:
+        image_path = os.path.join(config['folder']['operating'], image)
+        # Put them with correct definition
+        image_content = Image.open(image_path) 
+        image_content = image_content.resize((int(config['3dscene']['size']), int(config['3dscene']['size'])))
+        image_content.save(image_path)
+        logo = config['logo']['logofile']
+        scale = float(config['logo']['scale'])
+        margin = float(config['logo']['margin'])
+        opacity = float(config['logo']['opacity'])
+        destination = config['folder']['final_previews']
+        imaging.watermark(image_path, destination, logo, scale, margin, opacity)
+
 
 if __name__ == '__main__':
 	main()

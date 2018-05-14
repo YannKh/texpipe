@@ -71,10 +71,10 @@ def blender3drender(sbsfile, graphname, style):
     h = w
     
     # Texture set
-    basecolor_path = os.path.join(config['folder']['textures'], graphname + '_basecolor.png')
-    normal_path = os.path.join(config['folder']['textures'], graphname + '_normal.png')
-    roughness_path = os.path.join(config['folder']['textures'], graphname + '_roughness.png')
-    height_path = os.path.join(config['folder']['textures'], graphname + '_height.png')
+    basecolor_path = os.path.join(config['folder']['textures'], graphname + '-basecolor.png')
+    normal_path = os.path.join(config['folder']['textures'], graphname + '-normal.png')
+    roughness_path = os.path.join(config['folder']['textures'], graphname + '-roughness.png')
+    height_path = os.path.join(config['folder']['textures'], graphname + '-height.png')
 
     # Add displacement with height texture to the target object
     heightTex = bpy.data.textures.new('Texture name', type = 'IMAGE')
