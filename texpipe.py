@@ -24,16 +24,36 @@ def main():
     # Cook the corresponding.sbsar files
     for sbsfile in sbsfiles:
         pipe_substance.cooksbsar(sbsfile, config['folder']['sbsar'])
-    # Get the metadata from the sbs file
-    sbs_content = pipe_substance.read_sbs(sbsfile)
-    print('Contenu : {}'.format(sbs_content))
-
+        # Get the metadata from the sbs file (a list of dicts)
+        sbs_content = pipe_substance.read_sbs(sbsfile)
+        # Write the usefull metadata to a sidecar file in final_outputs folder
+        for dictionnary in sbs_content:
+            sidecar_path = os.path.join(config['folder']['final_previews'], '{}.nfo'.format(dictionnary['identifier']))
+            with open(sidecar_path, 'a') as my_sidecar_file: 
+                for item in dictionnary:
+                    if item == 'description' or item == 'usertags' or item == 'label':
+                        my_sidecar_file.write('{}:{}\n'.format(item, dictionnary[item]))
+        
             
         
         
     # Render the textures from the coked .sbsar
     # TODO FIXME
     # render_textures(material_name, random_seed, params, sbsar_file, output_size, output_path, use_gpu_engine)
+    # :param material_name: name of the material being rendered
+    # :type material_name: string
+    # :random_seed: use a random seed or not (then the seed would be 0)
+    # :type random_seed: boolean
+    # :param params: Instantiated parameters
+    # :type params: {string: [...]}
+    # :param sbsar_file: The sbsar file to render
+    # :type sbsar_file: string
+    # :param output_size: the output size for the rendered image. In format 2^n where n is the parameter
+    # :type output_size: int
+    # :param output_path: The directory to put the result
+    # :type output_path: string
+    # :param use_gpu_engine: Use GPU engine when rendering
+    # :type use_gpu_engine: bool
     
 
     
