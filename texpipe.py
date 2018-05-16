@@ -6,7 +6,7 @@ import shutil
 import zipfile
 import zlib
 from PIL import Image
-import time
+
 
 # Personnal libraries
 sys.path.insert(0, 'utilities')
@@ -19,11 +19,16 @@ def texpipe():
     
     # Get configuration informations
     config = utilities.compile_config('texpipe.cfg')
-    
+    logo_file = config['logo']['logofile']
+    scale_logo = float(config['logo']['scale'])
+    margin_logo = float(config['logo']['margin'])
+    opacity_logo = float(config['logo']['opacity'])
+    destination_logo = config['folder']['final_previews']
     #### Compute Tex files from asked .sbs and graph ####
     # Get the .sbs files list
     foldername = config['folder']['sbs']
-    sbsfiles = check_new_sbs_files('/home/yann/Documents/Programmation/python/allegorithmic/texpipe/tests/source/sbs_files')
+    sbsfiles = utilities.check_new_sbs_files(foldername)
+    print('Sbsfiles list : {}'.format(sbsfiles))
     # Cook the corresponding .sbsar files
     for sbsfile in sbsfiles:
         proceed_sbs = os.path.splitext(os.path.split(sbsfile)[1])[0]
@@ -60,6 +65,14 @@ def texpipe():
             # Copy the sbsar to final folder
             shutil.copyfile(sbsar_file, os.path.join(config['folder']['final_previews'], '{}.sbsar'.format(proceed_sbs)))
             
+            # Make a composite picture of the textures in the final folder
+            texture_composite = imaging.make_composite_texture(material_name,
+                                            config['folder']['textures'],
+                                            config['folder']['final_previews'],
+                                            int(config['3dscene']['size']))
+            # Watermarking in the same time than Blender images
+            imaging.watermark(texture_composite, destination_logo, logo_file, scale_logo, margin_logo, opacity_logo)
+            
             # Make a zip file with copy of all the textures, in final_outputs folder
             zip_path = os.path.join(config['folder']['final_previews'], '{}.zip'.format(dictionnary['identifier']))
             tex_path = config['folder']['textures']
@@ -71,6 +84,7 @@ def texpipe():
     
     # #### 3D renderings ####
     for file in sbsfiles:
+
         # get config file for this sbs folder, replace the default generic ones if needed
         config_folder = os.path.join(os.path.dirname(file), 'texpipe.cfg')
         folder_configuration = utilities.getconfig(config_folder)
@@ -84,12 +98,8 @@ def texpipe():
             config[key] = sbs_configuration[key]
         print('sbs_configuration :{}'.format(sbs_configuration))
         
-        # Make a scorched view of all the textures -> Operating folder
-        # TODO
-
-
-        
         for graphname in sbs_configuration:
+
             # Render the corresponding sbs
             if config['blender']:
                 # Render module with blender engine
@@ -116,66 +126,10 @@ def texpipe():
         image_content = Image.open(image_path) 
         image_content = image_content.resize((int(config['3dscene']['size']), int(config['3dscene']['size'])))
         image_content.save(image_path)
-        logo = config['logo']['logofile']
-        scale = float(config['logo']['scale'])
-        margin = float(config['logo']['margin'])
-        opacity = float(config['logo']['opacity'])
-        destination = config['folder']['final_previews']
-        imaging.watermark(image_path, destination, logo, scale, margin, opacity)
-
-def check_new_sbs_files(path):
-    """
-    Check for modified files in hierarchy
-    Add the modified .sbs files since last check
-    If the texpipe.cfg of a folder has changed -> add all the .sbs files of this folder
-    If the .cfg of a file has changed -> add the corresponding .sbs file
-
-    Return a list of sbs files
-    """
-    # Get the time from time_stamp_file if it exists, if not, it will rebake everything
-    # Stores last check epoch in last_check var
-
-    now = time.time()
-    if os.path.exists(os.path.join(path, 'time_stamp_ref.cfg')):
-        with open (os.path.join(path, 'time_stamp_ref.cfg'), 'r') as time_stamp:
-            content = time_stamp.read().splitlines()
-            last_check = float(content[0])
-    else:
-        last_check = float(0)
-
-    with open (os.path.join(path, 'time_stamp_ref.cfg'), 'w') as time_stamp:
-        time_stamp.write(str(now))
+        # Brand them
+        imaging.watermark(image_path, destination_logo, logo_file, scale_logo, margin_logo, opacity_logo)
+   
     
-    # Check for more recent files in the root folder (and sub-dirs)
-    files = []
-    sbs_files = []
-    for root, dirs, filenames in os.walk(path):
-        for filename in filenames:
-            file_full_path = os.path.abspath(os.path.join(root, filename))
-            file_epoch = os.path.getmtime(file_full_path)
-            if file_epoch > last_check:
-                files.append(file_full_path)
-
-    # print('Recent files : {}'.format(files))
     
-    for filename in files:
-        file_dirname = os.path.dirname(filename)
-        file_basename = os.path.basename(filename)
-        file_basename_no_extension = os.path.splitext(os.path.basename(filename))[0]
-        file_extension = os.path.splitext(os.path.basename(filename))[1][1:]
-        sbs_corresponding_file = os.path.join(file_dirname, file_basename_no_extension + '.sbs')
-        
-        if file_basename == 'texpipe.cfg':
-            for item in utilities.get_files_by_extension('sbs', file_dirname, False):
-                sbs_files.append(item)
-
-        if file_extension == 'cfg' and os.path.exists(sbs_corresponding_file):
-            sbs_files.append(sbs_corresponding_file)
-            
-        if file_extension == 'sbs':
-            sbs_files.append(filename)
-
-    return sbs_files
-
 if __name__ == '__main__':
     texpipe()
